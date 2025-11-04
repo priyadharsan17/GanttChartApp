@@ -6,15 +6,15 @@ import QtQuick.Layouts 1.3
 ApplicationWindow {
     id: root
     visible: true
-    width: appManager.width
-    height: appManager.height
+    width: Screen.width
+    height: Screen.height
     title: qsTr("GanttChart Application")
     color: appManager.primaryColor
 
     // Base design resolution — change to match your designer's artboard.
     property real designWidth: appManager.width
     property real designHeight: appManager.height
-    
+
     property real uiScale: Math.max(width / designWidth, height / designHeight)
 
     // Keep the Python-side appManager in sync with actual window metrics

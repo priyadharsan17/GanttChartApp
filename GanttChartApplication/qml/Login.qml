@@ -17,9 +17,9 @@ Page {
             radius: 8
             color: Qt.rgba(1,1,1,0.0)
             Text {
-                    text: qsTr("Welcome")
-                    font.family: "Lucida Console"
-                    font.pixelSize: appManager.baseFontSize + 8
+                    text: qsTr("GANTT.IO")
+                    font.family: "Ethnocentric"
+                    font.pixelSize: appManager.baseFontSize + 54
                     horizontalAlignment: Text.AlignHCenter
                     width: parent.width
                     color: "#333333"
