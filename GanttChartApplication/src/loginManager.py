@@ -1,10 +1,9 @@
 from PySide6.QtCore import QObject, Signal, Slot
 
 
-class Backend(QObject):
-    # loginResult(success, message)
+class LoginManager(QObject):
+    # Emits (success: bool, message: str)
     loginResult = Signal(bool, str)
-    # logoutRequested()
     logoutRequested = Signal()
 
     def __init__(self, parent=None):
@@ -12,13 +11,12 @@ class Backend(QObject):
 
     @Slot(str, str)
     def login(self, username, password):
-        # stubbed authentication; replace with real logic
+        # TODO: replace with real authentication
         if username == "user" and password == "pass":
-            self.loginResult.emit(True, "Welcome, {}".format(username))
+            self.loginResult.emit(True, f"Welcome, {username}")
         else:
             self.loginResult.emit(False, "Invalid username or password")
 
     @Slot()
     def logout(self):
-        # emit a simple logout request signal; App.qml will react and navigate
         self.logoutRequested.emit()

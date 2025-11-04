@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.3
 
 Page {
     id: page
-    anchors.fill: parent
 
     ColumnLayout {
         anchors.centerIn: parent
@@ -49,7 +48,7 @@ Page {
             fontFamily: appManager.fontFamily
             fontSize: appManager.baseFontSize
             onClicked: {
-                backend.login(usernameField.text, passwordField.text)
+                loginManager.login(usernameField.text, passwordField.text)
             }
         }
 
@@ -65,7 +64,7 @@ Page {
         }
 
         Connections {
-            target: backend
+            target: loginManager
             function onLoginResult(success, message) {
                 if (success) {
                     statusText.color = "#1b5e20"

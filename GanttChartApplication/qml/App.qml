@@ -52,6 +52,21 @@ ApplicationWindow {
                 anchors.fill: parent
                 initialItem: "Login.qml"
             }
+            
+            // Listen for login/logout events and navigate the StackView centrally
+            Connections {
+                target: loginManager
+                function onLoginResult(success, message) {
+                    if (success) {
+                        // replace the current Login page with Home so users can't go back
+                        stackView.replace(stackView.currentItem, "Home.qml")
+                    }
+                }
+                function onLogoutRequested() {
+                    // navigate back to login (replace current with Login)
+                    stackView.replace(stackView.currentItem, "Login.qml")
+                }
+            }
         }
     }
 }
