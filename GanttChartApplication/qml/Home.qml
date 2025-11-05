@@ -28,7 +28,7 @@ Page {
                 text: qsTr("Logout")
                 fontFamily: appManager.fontFamily
                 fontSize: appManager.baseFontSize
-                onClicked: backend.logout()
+                onClicked: loginManager.logout()
             }
         }
 
