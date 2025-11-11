@@ -46,25 +46,101 @@ ApplicationWindow {
             // Center the scaled content inside the window (will crop if uiScale>1)
             anchors.centerIn: parent
 
-            // StackView provides push/pop navigation for pages (login, dashboard)
-            StackView {
-                id: stackView
+            // Loader-based navigation with smooth transitions
+            Item {
+                id: navRoot
                 anchors.fill: parent
-                initialItem: "Login.qml"
-            }
-            
-            // Listen for login/logout events and navigate the StackView centrally
-            Connections {
-                target: loginManager
-                function onLoginResult(success, message) {
-                    if (success) {
-                        // replace the current Login page with Home so users can't go back
-                        stackView.replace(stackView.currentItem, "Home.qml")
+
+                // current and next loaded items for cross-fade/slide
+                Item {
+                    id: currentHolder
+                    anchors.fill: parent
+                    visible: true
+                }
+
+                Item {
+                    id: nextHolder
+                    anchors.fill: parent
+                    visible: false
+                }
+
+                Loader {
+                    id: currentLoader
+                    anchors.fill: parent
+                    source: "Login.qml"
+                    asynchronous: true
+                    onLoaded: {
+                        // parent the loaded item into the holder for consistent sizing
+                        if (item) {
+                            item.parent = currentHolder
+                            item.anchors.fill = currentHolder
+                        }
                     }
                 }
-                function onLogoutRequested() {
-                    // navigate back to login (replace current with Login)
-                    stackView.replace(stackView.currentItem, "Login.qml")
+
+                Loader {
+                    id: nextLoader
+                    anchors.fill: parent
+                    asynchronous: true
+                    visible: false
+                    onLoaded: {
+                        if (item) {
+                            item.parent = nextHolder
+                            item.anchors.fill = nextHolder
+                        }
+                    }
+                }
+
+                // predeclared parallel animation used for page transitions
+                ParallelAnimation {
+                    id: pageSwapAnim
+                    // animate current out
+                    PropertyAnimation { id: curXAnim; target: currentHolder; property: "x"; to: -root.width; duration: 320; easing.type: Easing.InOutQuad }
+                    NumberAnimation { id: curOpacityAnim; target: currentHolder; property: "opacity"; to: 0; duration: 320 }
+                    // animate next in
+                    PropertyAnimation { id: nextXAnim; target: nextHolder; property: "x"; from: root.width; to: 0; duration: 320; easing.type: Easing.InOutQuad }
+                    NumberAnimation { id: nextOpacityAnim; target: nextHolder; property: "opacity"; to: 1; duration: 320 }
+
+                    onStopped: {
+                        // move next content into currentLoader by swapping sources
+                        currentLoader.source = nextLoader.source
+                        // reset holders
+                        currentHolder.x = 0; currentHolder.opacity = 1; currentHolder.visible = true
+                        nextHolder.x = 0; nextHolder.opacity = 1; nextHolder.visible = false
+                        nextLoader.source = ""
+                    }
+                }
+
+                function navigateTo(qmlSource) {
+                    // load new page into nextLoader and perform a cross-fade
+                    if (!qmlSource || qmlSource === currentLoader.source) return
+                    nextLoader.source = qmlSource
+                    nextLoader.visible = true
+                    nextHolder.opacity = 0
+                    nextHolder.visible = true
+
+                    // animate: slide current left while fading out, fade-in next
+                    // position next holder off-screen to the right and reset opacities
+                    nextHolder.x = root.width
+                    nextHolder.opacity = 0
+                    currentHolder.x = 0
+                    currentHolder.opacity = 1
+                    // start the predeclared animation
+                    pageSwapAnim.start()
+                }
+
+                // Listen for login/logout events and navigate centrally
+                Connections {
+                    target: loginManager
+                    function onLoginResult(success, message) {
+                        if (success) {
+                            // move to Home and prevent going back
+                            navRoot.navigateTo("Home.qml")
+                        }
+                    }
+                    function onLogoutRequested() {
+                        navRoot.navigateTo("Login.qml")
+                    }
                 }
             }
         }
