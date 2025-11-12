@@ -135,11 +135,21 @@ ApplicationWindow {
                     function onLoginResult(success, message) {
                         if (success) {
                             // move to Home and prevent going back
-                            navRoot.navigateTo("Home.qml")
+                            // delegate to Python-side screenLoader so history is tracked
+                            if (screenLoader && screenLoader.navigateTo) screenLoader.navigateTo("Home.qml")
                         }
                     }
                     function onLogoutRequested() {
-                        navRoot.navigateTo("Login.qml")
+                        if (screenLoader && screenLoader.navigateTo) screenLoader.navigateTo("Login.qml")
+                    }
+                }
+
+                // Listen for navigation requests from Python and perform the visual transition
+                Connections {
+                    target: screenLoader
+                    function onNavigationRequested(source) {
+                        // call the existing JS navigation function which performs the loader swap + animation
+                        navRoot.navigateTo(source)
                     }
                 }
             }
